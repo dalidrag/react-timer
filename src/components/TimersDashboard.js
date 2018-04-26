@@ -1,12 +1,15 @@
 import React from 'react';
 import uuid from 'uuid';
 
+import PersistenceService from '../services/PersistenceService';
+
 import EditableTimerList from './EditableTimerList';
 import ToggleableTimerForm from './ToggleableTimerForm';
 
 export default class TimersDashboard extends React.Component {
-    state = {
-        timers: [
+    state = {timers: []};
+    static persistenceService = new PersistenceService;
+/*        timers: [
           {
             title: 'Practice squat',
             project: 'Gym Chores',
@@ -20,7 +23,11 @@ export default class TimersDashboard extends React.Component {
             elapsed: 1,
             runningSince: null,
     }, ],
-    };
+    }; */
+
+    componentDidMount() {
+        this.setState({timers: this.loadTimers()}); // synchronously get timers
+    }
 
     handleCreateFormSubmit = (timer) => {
         this.createTimer(timer);
@@ -33,11 +40,16 @@ export default class TimersDashboard extends React.Component {
     handleTrashClick = (timerId) => {
         this.deleteTimer(timerId);
     };
+
+    loadTimers = () => {
+        return TimersDashboard.persistenceService.loadTimers();
+    }
     
     createTimer = (timer) => {
         const t = { title: timer.title, project: timer.project, id: uuid.v4(), elapsed: 1, runningSince: null, } 
+        TimersDashboard.persistenceService.updateTimer(t, this.state.timers.length, t);
         this.setState({
-          timers: this.state.timers.concat(t),
+          timers: TimersDashboard.persistenceService.loadTimers(),
         });
     };
 
@@ -84,17 +96,20 @@ export default class TimersDashboard extends React.Component {
     stopTimer = (timerId) => {
         const now = Date.now();
         this.setState({
-            timers: this.state.timers.map((timer) => {
+            timers: this.state.timers.map((timer, timerIndex) => {
               if (timer.id === timerId) {
                 const lastElapsed = now - timer.runningSince;
+                TimersDashboard.persistenceService.updateTimer(timer, timerIndex, {elapsed: timer.elapsed + lastElapsed, runningSince: null });
                 return Object.assign({}, timer, {
                   elapsed: timer.elapsed + lastElapsed,
                   runningSince: null,
                 });
               } else {
                 return timer;
-      } }),
-      }); };
+              }
+            }),
+        });
+    };
 
     render() {
         return (
