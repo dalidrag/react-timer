@@ -97,6 +97,21 @@ export default class TimersDashboard extends React.Component {
     stopTimer = (timerId) => {
         const now = Date.now();
 
+        this.setState({
+            timers: this.state.timers.map((timer, timerIndex) => {
+              if (timer.id === timerId) {
+                const lastElapsed = now - timer.runningSince;
+                TimersDashboard.persistenceService.updateTimer(timer, timerIndex, {elapsed: timer.elapsed + lastElapsed, runningSince: null });
+                return Object.assign({}, timer, {
+                  elapsed: timer.elapsed + lastElapsed,
+                  runningSince: null,
+                });
+              } else {
+                return timer;
+              }
+            }),
+        });
+
         let timerIndex = 0;
         for (let timer of this.state.timers) {
             if (timer.id !== timerId) {
@@ -111,22 +126,6 @@ export default class TimersDashboard extends React.Component {
                 this.setState({timers: loadedTimers});
             })
         }
-        
-        /*
-        this.setState({
-            timers: this.state.timers.map((timer, timerIndex) => {
-              if (timer.id === timerId) {
-                const lastElapsed = now - timer.runningSince;
-                TimersDashboard.persistenceService.updateTimer(timer, timerIndex, {elapsed: timer.elapsed + lastElapsed, runningSince: null });
-                return Object.assign({}, timer, {
-                  elapsed: timer.elapsed + lastElapsed,
-                  runningSince: null,
-                });
-              } else {
-                return timer;
-              }
-            }),
-        }); */
     };
 
     render() {
