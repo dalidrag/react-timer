@@ -35,7 +35,7 @@ export default class TimersDashboard extends React.Component {
     };
     
     createTimer = (timer) => {
-        const t = { title: timer.title, project: timer.project, id: uuid.v4() } 
+        const t = { title: timer.title, project: timer.project, id: uuid.v4(), elapsed: 1, runningSince: null, } 
         this.setState({
           timers: this.state.timers.concat(t),
         });

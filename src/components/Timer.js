@@ -25,12 +25,14 @@ export default class Timer extends React.Component {
     };
 
     render() {
-    const options = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+    const localTimeOptions = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+    const UTCTimeOptions = { timeZone: 'UTC', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
 
-    const runningSinceString = this.props.runningSince && new Date(this.props.runningSince).toLocaleTimeString('en-US', options);
+    const runningSinceString = this.props.runningSince && new Date(this.props.runningSince).toLocaleTimeString('en-US', localTimeOptions);
+
     let elapsedString = this.props.runningSince
-        ? this.props.elapsed && new Date(Date.now() - this.props.runningSince + this.props.elapsed).toLocaleTimeString('en-US', options)
-        : this.props.elapsed && new Date(this.props.elapsed).toLocaleTimeString('en-US', options);
+        ? this.props.elapsed && new Date(Date.now() - this.props.runningSince + this.props.elapsed).toLocaleTimeString('en-US', UTCTimeOptions)
+        : this.props.elapsed && new Date(this.props.elapsed).toLocaleTimeString('en-US', UTCTimeOptions);
     elapsedString = elapsedString + ' / ' + runningSinceString;
 
     return (
