@@ -39,7 +39,7 @@ export default class Timer extends React.Component {
       : this.props.elapsed && new Date(this.props.elapsed)
 
     let elapsedString = elapsedTime.toLocaleTimeString('en-US', UTCTimeOptions) + ':' + this.pad(elapsedTime.getMilliseconds(), 3);
-    elapsedString = elapsedString + ' / ' + runningSinceString;
+    elapsedString = runningSinceString ? elapsedString + ' / ' + runningSinceString : elapsedString;
 
     return (
           <div className='ui centered card'>
