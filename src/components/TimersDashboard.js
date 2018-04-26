@@ -26,7 +26,9 @@ export default class TimersDashboard extends React.Component {
     }; */
 
     componentDidMount() {
-        this.setState({timers: this.loadTimers()}); // synchronously get timers
+        TimersDashboard.persistenceService.loadTimers().then((loadedTimers) => {
+            this.setState({timers: loadedTimers});
+        })
     }
 
     handleCreateFormSubmit = (timer) => {
@@ -40,17 +42,16 @@ export default class TimersDashboard extends React.Component {
     handleTrashClick = (timerId) => {
         this.deleteTimer(timerId);
     };
-
-    loadTimers = () => {
-        return TimersDashboard.persistenceService.loadTimers();
-    }
     
     createTimer = (timer) => {
         const t = { title: timer.title, project: timer.project, id: uuid.v4(), elapsed: 1, runningSince: null, } 
-        TimersDashboard.persistenceService.updateTimer(t, this.state.timers.length, t);
-        this.setState({
-          timers: TimersDashboard.persistenceService.loadTimers(),
-        });
+        TimersDashboard.persistenceService.updateTimer(t, this.state.timers.length, t)
+        .then(() => TimersDashboard.persistenceService.loadTimers())
+        .then((loadedTimers) => {
+            this.setState({
+              timers: loadedTimers,
+            });
+        })
     };
 
     updateTimer = (attrs) => {
@@ -95,6 +96,23 @@ export default class TimersDashboard extends React.Component {
 
     stopTimer = (timerId) => {
         const now = Date.now();
+
+        let timerIndex = 0;
+        for (let timer of this.state.timers) {
+            if (timer.id !== timerId) {
+                ++timerIndex;
+                continue;
+            }
+
+            const lastElapsed = now - timer.runningSince;
+            TimersDashboard.persistenceService.updateTimer(timer, timerIndex, {elapsed: timer.elapsed + lastElapsed, runningSince: null })
+            .then(() => TimersDashboard.persistenceService.loadTimers())
+            .then((loadedTimers) => {
+                this.setState({timers: loadedTimers});
+            })
+        }
+        
+        /*
         this.setState({
             timers: this.state.timers.map((timer, timerIndex) => {
               if (timer.id === timerId) {
@@ -108,7 +126,7 @@ export default class TimersDashboard extends React.Component {
                 return timer;
               }
             }),
-        });
+        }); */
     };
 
     render() {
