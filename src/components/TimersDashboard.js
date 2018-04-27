@@ -29,8 +29,10 @@ class TimersDashboard extends React.Component {
     }; */
 
     componentDidMount() {
+        this.props.showLoadingMessage(true);
         TimersDashboard.persistenceService.loadTimers().then((loadedTimers) => {
             this.props.loadTimers(loadedTimers);
+            this.props.showLoadingMessage(false);
         });
     }
 
@@ -132,7 +134,10 @@ class TimersDashboard extends React.Component {
     };
 
     render() {
-        if (this.props.timers) {
+        if (this.props.loadingMessage) {
+            return <p>Loading...</p>
+        }
+        else {
             return (
                 <div className='ui three column centered grid'>
                     <div className='column'>
@@ -144,14 +149,11 @@ class TimersDashboard extends React.Component {
                 </div>
             );
         }
-        else {
-            return null;
-        }
     }
 }
 
 const mapStateToProps = state => {
-    return { timers: state.timers }
+    return { timers: state.timers, loadingMessage: state.loadingMessage }
 };
 
 export default connect(mapStateToProps, actions)(TimersDashboard);

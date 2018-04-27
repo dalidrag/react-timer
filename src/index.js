@@ -5,11 +5,11 @@ import { createStore } from 'redux';
 
 import './index.css';
 import TimersDashboard from './components/TimersDashboard';
-import timers from './reducers/timers.js'
+import App from './reducers'
 
 import registerServiceWorker from './registerServiceWorker';
 
-const store = createStore(timers);
+const store = createStore(App);
 
 ReactDOM.render(
     <Provider store={store}>
