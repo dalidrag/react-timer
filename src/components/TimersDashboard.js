@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import uuid from 'uuid';
 
 import PersistenceService from '../services/PersistenceService';
@@ -6,7 +7,9 @@ import PersistenceService from '../services/PersistenceService';
 import EditableTimerList from './EditableTimerList';
 import ToggleableTimerForm from './ToggleableTimerForm';
 
-export default class TimersDashboard extends React.Component {
+import * as actions from '../actions';
+
+class TimersDashboard extends React.Component {
     state = {timers: []};
     static persistenceService = new PersistenceService;
 /*        timers: [
@@ -27,8 +30,8 @@ export default class TimersDashboard extends React.Component {
 
     componentDidMount() {
         TimersDashboard.persistenceService.loadTimers().then((loadedTimers) => {
-            this.setState({timers: loadedTimers});
-        })
+            this.props.loadTimers(loadedTimers);
+        });
     }
 
     handleCreateFormSubmit = (timer) => {
@@ -42,20 +45,19 @@ export default class TimersDashboard extends React.Component {
     handleTrashClick = (timerId) => {
         this.deleteTimer(timerId);
     };
-    
+
     createTimer = (timer) => {
-        const t = { title: timer.title, project: timer.project, id: uuid.v4(), elapsed: 1, runningSince: null, } 
-        TimersDashboard.persistenceService.updateTimer(t, this.state.timers.length, t)
-        .then(() => TimersDashboard.persistenceService.loadTimers())
+/*        const t = { title: timer.title, project: timer.project, id: uuid.v4(), elapsed: 1, runningSince: null, } 
+        .then(() => TimersDashboard.)
         .then((loadedTimers) => {
             this.setState({
               timers: loadedTimers,
             });
-        })
+        }) */
     };
 
     updateTimer = (attrs) => {
-        this.setState({
+/*        this.setState({
           timers: this.state.timers.map((timer) => {
             if (timer.id === attrs.id) {
               return Object.assign({}, timer, {
@@ -65,7 +67,7 @@ export default class TimersDashboard extends React.Component {
     } else {
               return timer;
             }
-    }), });
+    }), }); */
     };
 
     deleteTimer = (timerId) => {
@@ -95,7 +97,7 @@ export default class TimersDashboard extends React.Component {
     }); };
 
     stopTimer = (timerId) => {
-        const now = Date.now();
+/*        const now = Date.now();
 
         let timerIndex = 0;
         for (let timer of this.state.timers) {
@@ -110,7 +112,7 @@ export default class TimersDashboard extends React.Component {
             .then((loadedTimers) => {
                 this.setState({timers: loadedTimers});
             })
-        }
+        } */
         
         /*
         this.setState({
@@ -130,15 +132,26 @@ export default class TimersDashboard extends React.Component {
     };
 
     render() {
-        return (
-            <div className='ui three column centered grid'>
-                <div className='column'>
-                    <EditableTimerList timers={this.state.timers} onFormSubmit={this.handleEditFormSubmit}
-                                        onTrashClick={this.handleTrashClick}
-                                        onStartClick={this.handleStartClick} onStopClick={this.handleStopClick} />
-                    <ToggleableTimerForm onFormSubmit={this.handleCreateFormSubmit} />
+        if (this.props.timers) {
+            return (
+                <div className='ui three column centered grid'>
+                    <div className='column'>
+                        <EditableTimerList timers={this.props.timers} onFormSubmit={this.handleEditFormSubmit}
+                                            onTrashClick={this.handleTrashClick}
+                                            onStartClick={this.handleStartClick} onStopClick={this.handleStopClick} />
+                        <ToggleableTimerForm onFormSubmit={this.handleCreateFormSubmit} />
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        }
+        else {
+            return null;
+        }
     }
 }
+
+const mapStateToProps = state => {
+    return { timers: state.timers }
+};
+
+export default connect(mapStateToProps, actions)(TimersDashboard);
