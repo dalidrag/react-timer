@@ -32,7 +32,8 @@ function setTimer(timers, timerId, oldTimerValue) {
 export default class TimersDashboard extends React.Component {
     state = { timers: [] };
     static persistenceService = new PersistenceService;
-    static oldTimerValue = {};
+    static oldTimerValue = null;
+    static stopRequestAlreadyPending = false;  // for preventing conflicting invocations of setTimer
     /*        timers: [
               {
                 title: 'Practice squat',
@@ -111,7 +112,7 @@ export default class TimersDashboard extends React.Component {
         this.setState({
             timers: this.state.timers.map((timer) => {
                 if (timer.id === timerId) {
-                    TimersDashboard.oldTimerValue = timer;
+                    if (!TimersDashboard.stopRequestAlreadyPending) TimersDashboard.oldTimerValue = timer;
                     return Object.assign({}, timer, {
                         runningSince: now,
                     });
@@ -123,6 +124,11 @@ export default class TimersDashboard extends React.Component {
     };
 
     stopTimer = (timerId) => {
+        if (TimersDashboard.stopRequestAlreadyPending) {
+            console.log('Stop request already pending.');
+            return;
+        }
+        
         const now = Date.now();
 
         let timerIndex = 0;
@@ -133,6 +139,7 @@ export default class TimersDashboard extends React.Component {
             }
 
             const lastElapsed = now - timer.runningSince;
+            TimersDashboard.stopRequestAlreadyPending = true;
             TimersDashboard.persistenceService.updateTimer(timer, timerIndex, { elapsed: timer.elapsed + lastElapsed, runningSince: null })
                 .then(() => TimersDashboard.persistenceService.loadTimers())
                 .then((loadedTimers) => {
@@ -140,6 +147,9 @@ export default class TimersDashboard extends React.Component {
                 })
                 .catch(() => {
                     this.setState({ timers: setTimer(this.state.timers, timerId, TimersDashboard.oldTimerValue) });
+                })
+                .then(() => {
+                    TimersDashboard.stopRequestAlreadyPending = false;
                 })
 
             break;
