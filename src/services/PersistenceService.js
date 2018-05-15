@@ -1,4 +1,24 @@
 export default class TimersPersistence {
+
+    createTimer(timer, timerIndex) {
+        return new Promise((resolve, reject) => {
+            const timerKeyString = `timer-${timerIndex}`
+
+            const titleKeyString = timerKeyString + 'title';
+            const projectKeyString = timerKeyString + 'project';
+            const idKeyString = timerKeyString + 'id';
+            const elapsedKeyString = timerKeyString + 'elapsed';
+            const runningSinceKeyString = timerKeyString + 'runningSince';
+            
+            localStorage.setItem(titleKeyString, timer.title);
+            localStorage.setItem(projectKeyString, timer.project);
+            localStorage.setItem(idKeyString, timer.id);
+            localStorage.setItem(elapsedKeyString, timer.elapsed);
+            localStorage.setItem(runningSinceKeyString, timer.runningSince);
+            
+            resolve(true);
+        });
+    }
     
     updateTimer(timer, timerIndex, toUpdate) {
         return new Promise((resolve, reject) => {

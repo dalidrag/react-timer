@@ -70,7 +70,7 @@ export default class TimersDashboard extends React.Component {
 
     createTimer = (timer) => {
         const t = { title: timer.title, project: timer.project, id: uuid.v4(), elapsed: 1, runningSince: null, }
-        TimersDashboard.persistenceService.updateTimer(t, this.state.timers.length, t)
+        TimersDashboard.persistenceService.createTimer(t, this.state.timers.length)
             .then(() => TimersDashboard.persistenceService.loadTimers())
             .then((loadedTimers) => {
                 this.setState({
